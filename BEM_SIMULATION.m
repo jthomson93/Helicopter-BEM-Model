@@ -17,10 +17,10 @@ Radius = i_Radius;
 Theta_not = i_Theta_Not;
 Theta_one = i_Twist_Theta1;
 x_not = i_Blade_Cutout;
-RPM = 207;
-Omega = rpm2rad(RPM); 
-% Omega = Mach2Omega( i_TipMach, a, Radius );
-% disp(Omega);
+% RPM = 207;
+% Omega = rpm2rad(RPM); 
+Omega = Mach2Omega( i_TipMach, a, Radius );
+
 % Area = 262.68;
 
 % ---- CHARACTARISTICS FROM TABLE ----
@@ -60,7 +60,7 @@ initalisation;
         profile_torque(index) = profileTorque(Blades,c(index),CD_incomp(index),x(index),Radius);
 
         if index == (Nbe + 1)
-            CQi = profTorqueCoef(profile_torque,Nbe);
+            CQnot = profTorqueCoef(profile_torque,Nbe);
         end
 
         induced_Torque(index) = InducedTorque(Blades,c(index),CL(index),inflow(index),x(index),Radius);
@@ -71,7 +71,7 @@ initalisation;
         end
   
     end
-    
+   
    TwoCT = sqrt(2 * CT);
    
    % ---- SWIRL INDUCED POWER TO THRUST RATIO ----
@@ -87,15 +87,24 @@ initalisation;
     end
 
  swirl = trapz(swirlX, swirlSum);
-    
+ 
+ delta_cqi = swirl * CQI;
 
  % ---- END SWIRL INDUCED PTR ----
+ 
+ DL = CT * rho * (Omega * Radius)^2;
+ 
+ DLx = DL * (CT/solidity);
+ %---- MEASURED/CALCULATED PWR ----
+ MCP = measuredCalc(DLx);
+ 
+ CQ = (CQI +delta_cqi + CQnot) * MCP;
 
-    
+
     CT_Solidity = CT/solidity;
     CQ_Solidity = CQ/solidity;
     
-    RESULTS = [CT_Solidity, CQ_Solidity];
+    RESULTS = real([CT_Solidity, CQ_Solidity]);
 
 end
 
