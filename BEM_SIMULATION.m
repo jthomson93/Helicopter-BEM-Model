@@ -10,15 +10,17 @@ Blade_Elements = i_NBe;                 % Must be greater than 5
 Nbe = check_nbe(Blade_Elements);    % Error Checking: Ensure nbe > 5
 
 %---- BLADE CONSTANTS ----
+rho = 1.2256;                           % Density of air
+a = 340;                                       % Speed of sound constant          
 Blades = i_Blades;
 Radius = i_Radius;
 Theta_not = i_Theta_Not;
 Theta_one = i_Twist_Theta1;
 x_not = i_Blade_Cutout;
 RPM = 207;
-Omega = rpm2rad(RPM);     
-rho = 1.2256;                           % Density of air
-a = 340;                                        % Speed of sound constant
+Omega = rpm2rad(RPM); 
+% Omega = Mach2Omega( i_TipMach, a, Radius );
+% disp(Omega);
 % Area = 262.68;
 
 % ---- CHARACTARISTICS FROM TABLE ----
@@ -58,7 +60,7 @@ initalisation;
         profile_torque(index) = profileTorque(Blades,c(index),CD_incomp(index),x(index),Radius);
 
         if index == (Nbe + 1)
-            CQ = profTorqueCoef(profile_torque,Nbe);
+            CQi = profTorqueCoef(profile_torque,Nbe);
         end
 
         induced_Torque(index) = InducedTorque(Blades,c(index),CL(index),inflow(index),x(index),Radius);
@@ -67,8 +69,28 @@ initalisation;
         if index == (Nbe + 1)
             CQI = inducedTorqueCoef(induced_Torque,CQIB,Nbe,B);
         end
-
+  
     end
+    
+   TwoCT = sqrt(2 * CT);
+   
+   % ---- SWIRL INDUCED POWER TO THRUST RATIO ----
+   
+    for index = 1:(Nbe +2)
+        if index == 1
+             swirlSum(index) = swirlRatio(CT, TwoCT);
+             swirlX(index) = TwoCT;
+        else
+        swirlSum(index) = swirlRatio(CT, x(index-1));
+        swirlX(index) = x(index-1);
+        end
+    end
+
+ swirl = trapz(swirlX, swirlSum);
+    
+
+ % ---- END SWIRL INDUCED PTR ----
+
     
     CT_Solidity = CT/solidity;
     CQ_Solidity = CQ/solidity;

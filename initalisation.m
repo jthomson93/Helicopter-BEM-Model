@@ -25,3 +25,5 @@ CT = 0;
 profile_torque = zeros(1,Nbe+1);
 CQ = 0;
 induced_Torque = zeros(1,Nbe+1);
+swirlSum = zeros(1,Nbe+2);
+swirlX= zeros(1,Nbe+2);
